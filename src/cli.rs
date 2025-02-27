@@ -159,11 +159,10 @@ pub fn return_args(args: Args) -> ValidatedArgs {
 #[cfg(test)]
 mod tests {
     use super::*;
+    const FAKE_TOKEN: &str = "glpat-1234567890abcdef1234";
 
     #[test]
     fn test_valid_token() {
-        const FAKE_TOKEN: &str = "glpat-1234567890abcdef1234";
-
         let args = Args {
             gitlab_token: FAKE_TOKEN.to_string(),
             instance_url: "https://gitlab.com".to_string(),
@@ -194,7 +193,7 @@ mod tests {
     #[test]
     fn test_invalid_token_prefix() {
         let args = Args {
-            gitlab_token: "token-1234567890abcdef12345678".to_string(),
+            gitlab_token: "token-1234567890abcdef1234".to_string(),
             instance_url: "https://gitlab.com".to_string(),
             full_scan: true,
             group_scan: None,
@@ -209,7 +208,7 @@ mod tests {
     #[test]
     fn test_valid_instance_url() {
         let args = Args {
-            gitlab_token: "glpat-1234567890abcdef12345678".to_string(),
+            gitlab_token: FAKE_TOKEN.to_string(),
             instance_url: "https://gitlab.com".to_string(),
             full_scan: true,
             group_scan: None,
@@ -224,7 +223,7 @@ mod tests {
     #[test]
     fn test_instance_url_with_trailing_slash() {
         let args = Args {
-            gitlab_token: "glpat-1234567890abcdef12345678".to_string(),
+            gitlab_token: FAKE_TOKEN.to_string(),
             instance_url: "https://gitlab.com/".to_string(),
             full_scan: true,
             group_scan: None,
@@ -239,7 +238,7 @@ mod tests {
     #[test]
     fn test_invalid_instance_url() {
         let args = Args {
-            gitlab_token: "glpat-1234567890abcdef12345678".to_string(),
+            gitlab_token: FAKE_TOKEN.to_string(),
             instance_url: "invalid-url".to_string(),
             full_scan: true,
             group_scan: None,
@@ -254,7 +253,7 @@ mod tests {
     #[test]
     fn test_full_scan_type() {
         let args = Args {
-            gitlab_token: "glpat-1234567890abcdef12345678".to_string(),
+            gitlab_token: FAKE_TOKEN.to_string(),
             instance_url: "https://gitlab.com".to_string(),
             full_scan: true,
             group_scan: None,
@@ -272,7 +271,7 @@ mod tests {
     #[test]
     fn test_group_scan_type() {
         let args = Args {
-            gitlab_token: "glpat-1234567890abcdef12345678".to_string(),
+            gitlab_token: FAKE_TOKEN.to_string(),
             instance_url: "https://gitlab.com".to_string(),
             full_scan: false,
             group_scan: Some(123),
@@ -290,7 +289,7 @@ mod tests {
     #[test]
     fn test_project_scan_type() {
         let args = Args {
-            gitlab_token: "glpat-1234567890abcdef12345678".to_string(),
+            gitlab_token: FAKE_TOKEN.to_string(),
             instance_url: "https://gitlab.com".to_string(),
             full_scan: false,
             group_scan: None,
@@ -308,7 +307,7 @@ mod tests {
     #[test]
     fn test_negative_group_id() {
         let args = Args {
-            gitlab_token: "glpat-1234567890abcdef12345678".to_string(),
+            gitlab_token: FAKE_TOKEN.to_string(),
             instance_url: "https://gitlab.com".to_string(),
             full_scan: false,
             group_scan: Some(-5),
@@ -323,7 +322,7 @@ mod tests {
     #[test]
     fn test_negative_project_id() {
         let args = Args {
-            gitlab_token: "glpat-1234567890abcdef12345678".to_string(),
+            gitlab_token: FAKE_TOKEN.to_string(),
             instance_url: "https://gitlab.com".to_string(),
             full_scan: false,
             group_scan: None,
@@ -338,7 +337,7 @@ mod tests {
     #[test]
     fn test_no_scan_type() {
         let args = Args {
-            gitlab_token: "glpat-1234567890abcdef12345678".to_string(),
+            gitlab_token: FAKE_TOKEN.to_string(),
             instance_url: "https://gitlab.com".to_string(),
             full_scan: false,
             group_scan: None,
@@ -356,7 +355,7 @@ mod tests {
     #[test]
     fn test_multiple_scan_types() {
         let args = Args {
-            gitlab_token: "glpat-1234567890abcdef12345678".to_string(),
+            gitlab_token: FAKE_TOKEN.to_string(),
             instance_url: "https://gitlab.com".to_string(),
             full_scan: true,
             group_scan: Some(123),
@@ -373,8 +372,6 @@ mod tests {
 
     #[test]
     fn test_validate_args_success() {
-        const FAKE_TOKEN: &str = "glpat-1234567890abcdef1234";
-
         let args = Args {
             gitlab_token: FAKE_TOKEN.to_string(),
             instance_url: "https://gitlab.com".to_string(),
