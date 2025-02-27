@@ -110,20 +110,24 @@ impl ArgsValidation for Args {
                 match enabled_scans[0].1 {
                     "full" => Ok(ScanType::Full),
                     "group" => {
-                        let id = self.group_scan.unwrap();
-                        if id > 0 {
-                            Ok(ScanType::Group(id))
-                        } else {
-                            Err("Group ID must be a positive integer".to_string())
-                        }
+                        self.group_scan
+                            .map_or(Err("Group ID must be a positive integer".to_string()), |id| {
+                                if id > 0 {
+                                    Ok(ScanType::Group(id))
+                                } else {
+                                    Err("Group ID must be a positive integer".to_string())
+                                }
+                            })
                     },
                     "project" => {
-                        let id = self.project_scan.unwrap();
-                        if id > 0 {
-                            Ok(ScanType::Project(id))
-                        } else {
-                            Err("Project ID must be a positive integer".to_string())
-                        }
+                        self.project_scan
+                            .map_or(Err("Project ID must be a positive integer".to_string()), |id| {
+                                if id > 0 {
+                                    Ok(ScanType::Project(id))
+                                } else {
+                                    Err("Project ID must be a positive integer".to_string())
+                                }
+                            })
                     },
                     _ => unreachable!(),
                 }
@@ -159,6 +163,7 @@ pub fn return_args(args: Args) -> ValidatedArgs {
 #[cfg(test)]
 mod tests {
     use super::*;
+
     const FAKE_TOKEN: &str = "glpat-1234567890abcdef1234";
 
     #[test]
