@@ -41,6 +41,7 @@ pub struct Args {
         short = 'g',
         long,
         required = false,
+        value_name = "GROUP_ID",
         help = "The id of the group to be scanned, e.g. 123."
     )]
     pub group_scan: Option<i32>,
@@ -49,6 +50,7 @@ pub struct Args {
         short = 'p',
         long,
         required = false,
+        value_name = "PROJECT_ID",
         help = "The id of the project to be scanned, e.g. 10997."
     )]
     pub project_scan: Option<i32>,

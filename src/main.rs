@@ -8,5 +8,5 @@ async fn main() {
 
     println!("GitLab Token: {}", args.gitlab_token);
     println!("Instance URL: {}", args.instance_url);
-    println!("Full Scan: {:?}", args.scan_type);
+    println!("Scan type: {:?}", args.scan_type);
 }
