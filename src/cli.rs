@@ -77,6 +77,14 @@ impl ArgsValidation for Args {
             .map_err(|e| format!("Invalid URL: {}", e))
             .and_then(|url| {
                 if url.scheme() == "http" || url.scheme() == "https" {
+                    let url = if url.path().ends_with('/') {
+                        let mut url = url.clone();
+                        let path = url.path().to_string();
+                        url.set_path(&path[..path.len()-1]);
+                        url
+                    } else {
+                        url
+                    };
                     let url = url.join(GITLAB_API_PATH).map_err(|_| "The URL value does not follow an URL scheme and cannot be concatenated with the Gitlab API Path")?;
                     Ok(url)
                 } else {
