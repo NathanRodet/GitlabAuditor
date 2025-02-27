@@ -1,3 +1,3 @@
 # GitlabAuditor
 
-Quickly audit your Gitlab instance to find secrets.
+Quickly audit your Gitlab instance pipelines logs to find secrets.
