@@ -1,9 +1,11 @@
 [package]
 name = "gitlab_auditor"
+authors = ["Rodet Nathan"]
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+tokio = { version = "1.43", features = ["full"] }
 clap = { version = "4.5", features = ["derive"] }
 regex = "1.11"
 url = "2.5"

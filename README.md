@@ -1,3 +1,3 @@
 # GitlabAuditor
 
-A tool aiming to find secrets in your Gitlab instance.
+Quickly audit your Gitlab Instance to find secrets.
