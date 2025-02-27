@@ -62,13 +62,15 @@ pub trait ArgsValidation {
 
 impl ArgsValidation for Args {
     fn gitlab_token(&self) -> Result<&String, String> {
-        if self.gitlab_token.len() != 26 {
-            Err("Token must be 26 characters".to_string())
-        } else if !self.gitlab_token.starts_with("glpat-") {
-            Err("Token must start with 'glpat-'".to_string())
-        } else {
-            Ok(&self.gitlab_token)
+        if !self.gitlab_token.starts_with("glpat-") {
+            return Err("Token must start with 'glpat-'".to_string());
         }
+
+        if self.gitlab_token.len() != 26 {
+            return Err("Token must be 26 characters".to_string());
+        }
+
+        Ok(&self.gitlab_token)
     }
 
     fn instance_url(&self) -> Result<Url, String> {
@@ -152,4 +154,264 @@ pub fn validate_args(args: &Args) -> Result<ValidatedArgs, String> {
 
 pub fn return_args(args: Args) -> ValidatedArgs {
     validate_args(&args).expect("Invalid arguments")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_valid_token() {
+        const FAKE_TOKEN: &str = "glpat-1234567890abcdef1234";
+
+        let args = Args {
+            gitlab_token: FAKE_TOKEN.to_string(),
+            instance_url: "https://gitlab.com".to_string(),
+            full_scan: true,
+            group_scan: None,
+            project_scan: None,
+        };
+
+        let result = args.gitlab_token();
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_invalid_token_length() {
+        let args = Args {
+            gitlab_token: "glpat-too-short".to_string(),
+            instance_url: "https://gitlab.com".to_string(),
+            full_scan: true,
+            group_scan: None,
+            project_scan: None,
+        };
+
+        let result = args.gitlab_token();
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err(), "Token must be 26 characters");
+    }
+
+    #[test]
+    fn test_invalid_token_prefix() {
+        let args = Args {
+            gitlab_token: "token-1234567890abcdef12345678".to_string(),
+            instance_url: "https://gitlab.com".to_string(),
+            full_scan: true,
+            group_scan: None,
+            project_scan: None,
+        };
+
+        let result = args.gitlab_token();
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err(), "Token must start with 'glpat-'");
+    }
+
+    #[test]
+    fn test_valid_instance_url() {
+        let args = Args {
+            gitlab_token: "glpat-1234567890abcdef12345678".to_string(),
+            instance_url: "https://gitlab.com".to_string(),
+            full_scan: true,
+            group_scan: None,
+            project_scan: None,
+        };
+
+        let result = args.instance_url();
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap().as_str(), "https://gitlab.com/api/v4");
+    }
+
+    #[test]
+    fn test_instance_url_with_trailing_slash() {
+        let args = Args {
+            gitlab_token: "glpat-1234567890abcdef12345678".to_string(),
+            instance_url: "https://gitlab.com/".to_string(),
+            full_scan: true,
+            group_scan: None,
+            project_scan: None,
+        };
+
+        let result = args.instance_url();
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap().as_str(), "https://gitlab.com/api/v4");
+    }
+
+    #[test]
+    fn test_invalid_instance_url() {
+        let args = Args {
+            gitlab_token: "glpat-1234567890abcdef12345678".to_string(),
+            instance_url: "invalid-url".to_string(),
+            full_scan: true,
+            group_scan: None,
+            project_scan: None,
+        };
+
+        let result = args.instance_url();
+        assert!(result.is_err());
+        assert!(result.unwrap_err().starts_with("Invalid URL:"));
+    }
+
+    #[test]
+    fn test_full_scan_type() {
+        let args = Args {
+            gitlab_token: "glpat-1234567890abcdef12345678".to_string(),
+            instance_url: "https://gitlab.com".to_string(),
+            full_scan: true,
+            group_scan: None,
+            project_scan: None,
+        };
+
+        let result = args.scan_type();
+        assert!(result.is_ok());
+        match result.unwrap() {
+            ScanType::Full => (),
+            _ => panic!("Expected Full scan type"),
+        }
+    }
+
+    #[test]
+    fn test_group_scan_type() {
+        let args = Args {
+            gitlab_token: "glpat-1234567890abcdef12345678".to_string(),
+            instance_url: "https://gitlab.com".to_string(),
+            full_scan: false,
+            group_scan: Some(123),
+            project_scan: None,
+        };
+
+        let result = args.scan_type();
+        assert!(result.is_ok());
+        match result.unwrap() {
+            ScanType::Group(id) => assert_eq!(id, 123),
+            _ => panic!("Expected Group scan type"),
+        }
+    }
+
+    #[test]
+    fn test_project_scan_type() {
+        let args = Args {
+            gitlab_token: "glpat-1234567890abcdef12345678".to_string(),
+            instance_url: "https://gitlab.com".to_string(),
+            full_scan: false,
+            group_scan: None,
+            project_scan: Some(10997),
+        };
+
+        let result = args.scan_type();
+        assert!(result.is_ok());
+        match result.unwrap() {
+            ScanType::Project(id) => assert_eq!(id, 10997),
+            _ => panic!("Expected Project scan type"),
+        }
+    }
+
+    #[test]
+    fn test_negative_group_id() {
+        let args = Args {
+            gitlab_token: "glpat-1234567890abcdef12345678".to_string(),
+            instance_url: "https://gitlab.com".to_string(),
+            full_scan: false,
+            group_scan: Some(-5),
+            project_scan: None,
+        };
+
+        let result = args.scan_type();
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err(), "Group ID must be a positive integer");
+    }
+
+    #[test]
+    fn test_negative_project_id() {
+        let args = Args {
+            gitlab_token: "glpat-1234567890abcdef12345678".to_string(),
+            instance_url: "https://gitlab.com".to_string(),
+            full_scan: false,
+            group_scan: None,
+            project_scan: Some(-10),
+        };
+
+        let result = args.scan_type();
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err(), "Project ID must be a positive integer");
+    }
+
+    #[test]
+    fn test_no_scan_type() {
+        let args = Args {
+            gitlab_token: "glpat-1234567890abcdef12345678".to_string(),
+            instance_url: "https://gitlab.com".to_string(),
+            full_scan: false,
+            group_scan: None,
+            project_scan: None,
+        };
+
+        let result = args.scan_type();
+        assert!(result.is_err());
+        assert_eq!(
+            result.unwrap_err(),
+            "You must specify exactly one scan type: --full-scan, --group-scan, or --project-scan"
+        );
+    }
+
+    #[test]
+    fn test_multiple_scan_types() {
+        let args = Args {
+            gitlab_token: "glpat-1234567890abcdef12345678".to_string(),
+            instance_url: "https://gitlab.com".to_string(),
+            full_scan: true,
+            group_scan: Some(123),
+            project_scan: None,
+        };
+
+        let result = args.scan_type();
+        assert!(result.is_err());
+        assert_eq!(
+            result.unwrap_err(),
+            "Only one scan type can be specified: --full-scan, --group-scan, or --project-scan"
+        );
+    }
+
+    #[test]
+    fn test_validate_args_success() {
+        const FAKE_TOKEN: &str = "glpat-1234567890abcdef1234";
+
+        let args = Args {
+            gitlab_token: FAKE_TOKEN.to_string(),
+            instance_url: "https://gitlab.com".to_string(),
+            full_scan: true,
+            group_scan: None,
+            project_scan: None,
+        };
+
+        let result = validate_args(&args);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_validate_args_failure() {
+        let args = Args {
+            gitlab_token: "invalid-token".to_string(),
+            instance_url: "https://gitlab.com".to_string(),
+            full_scan: true,
+            group_scan: None,
+            project_scan: None,
+        };
+
+        let result = validate_args(&args);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    #[should_panic(expected = "Invalid arguments")]
+    fn test_return_args_with_invalid_args() {
+        let args = Args {
+            gitlab_token: "invalid-token".to_string(),
+            instance_url: "https://gitlab.com".to_string(),
+            full_scan: true,
+            group_scan: None,
+            project_scan: None,
+        };
+
+        return_args(args);
+    }
 }
