@@ -32,9 +32,9 @@ impl std::fmt::Display for Group {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Pipeline {
     pub id: u64,
-    pub iid: u64,
-    pub name: String,
-    pub web_url: String,
+    pub project_id: u64,
+    pub branch_ref: String,
+    pub status: String,
     // Full response format: https://docs.gitlab.com/api/pipelines/#list-project-pipelines
 }
 
@@ -42,8 +42,37 @@ impl std::fmt::Display for Pipeline {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Pipeline {} (ID: {}, IID: {}, URL: {})",
-            self.name, self.id, self.iid, self.web_url
+            "Pipeline for project: {} (ID: {}, Branch: {}, Status: {})",
+            self.project_id, self.id, self.branch_ref, self.status
         )
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Job {
+    pub id: u64,
+    pub name: String,
+
+    pub web_url: String,
+    // Full response format: https://docs.gitlab.com/api/jobs/#list-project-jobs
+}
+
+impl std::fmt::Display for Job {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Job {} (ID: {})", self.name, self.id)
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Artifact {
+    pub file_type: String,
+    pub size: u64,
+    pub filename: String,
+    pub file_format: String,
+}
+
+impl std::fmt::Display for Artifact {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Artifact {} (Size: {})", self.filename, self.size)
     }
 }
