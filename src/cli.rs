@@ -5,6 +5,7 @@ use url::Url;
 const GITLAB_API_PATH: &str = "/api/v4";
 
 pub fn print_banner() {
+    println!();
     println!(
         "{}",
         " ██████╗ ██╗████████╗██╗      █████╗ ██████╗      █████╗ ██╗   ██╗██████╗ ██╗████████╗ ██████╗ ██████╗ "
@@ -41,6 +42,7 @@ pub fn print_banner() {
             .bold()
             .red()
     );
+    println!();
 }
 
 #[derive(Debug, Clone)]

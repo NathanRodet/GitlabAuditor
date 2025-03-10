@@ -229,7 +229,7 @@ pub async fn fetch_job_traces_for_projects(
         std::fs::remove_dir_all("results/log_traces").expect("Failed to clear old log traces");
     }
 
-    println!("{}", "Starting Fetching job traces...".bold().blue());
+    println!("{}", "Starting fetching job traces...".bold().blue());
 
     for (project, result) in projects.iter().zip(results) {
         match result {
