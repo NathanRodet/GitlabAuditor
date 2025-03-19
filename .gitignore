@@ -25,3 +25,5 @@ Cargo.lock
 # Gitlab Auditor specific files
 results/
 DEVDOC.md
+/gitleaks.exe
+/gitleaks_results.json
